@@ -1,14 +1,6 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
 
-const trySomething = {
-  email: {
-    type: "algo@algo.com",
-  },
-  password: {
-    type: "sinnwww",
-  },
-};
 
 // Route to create new user
 router.get("/", async (req, res, next) => {
