@@ -75,6 +75,30 @@ router.delete("/:artObjectId", async (req, res) => {
   }
 });
 
+// Route to search an art
+
+router.get('/search/:keyword', async (req, res) => {
+  try {
+    const { keyword } = req.params
+    const results = await Product.find({
+      $or: [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ]
+    }).select('-photo')
+    res.json(results)
+  } catch (error) {
+    console.log(error)
+    res.status(400).send({
+      success: false,
+      message: 'Error In Search Product API',
+      error,
+    })
+
+  }
+
+})
+
 //To add a piece to cart
 router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {
   try {
