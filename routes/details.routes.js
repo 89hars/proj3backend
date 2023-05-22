@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
-
+const Product = require("../models/Product.models");
 
 // Route to create new user
-router.get("/", async (req, res, next) => {
+router.get("/create", async (req, res, next) => {
   try {
     const newUser = await User.find();
     res.status(200).json(newUser);
@@ -13,36 +13,49 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+// Get all piece of art
+
+router.get("/allproducts", async (req, res) => {
+  try {
+    const allArt = await Product.find();
+    res.status(200).json(allArt);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 // Get one piece of art
 
-router.get("/:artObjectId", async (req, res) => {
+router.get("/details/:artObjectId", async (req, res) => {
   try {
-    const pieceOfArt = await PieceOfArt.findById(req.params.artObjectId);
+    const pieceOfArt = await Product.findById(req.params.artObjectId);
     res.status(200).json(pieceOfArt);
   } catch (error) {
     console.log(error);
   }
 });
 
+
+
 // Create one piece a new piece art
 
-router.post("/details", async (req, res) => {
-  const payload = /*req.body*/ trySomething;
+router.post("/create", async (req, res) => {
+  const payload = req.body;
   try {
-    const newPieceOfArt = await NewPieceOfArt.create(payload);
+    const newPieceOfArt = await Product.create(payload);
     res.status(201).json(newPieceOfArt);
   } catch (error) {
     console.log(error);
   }
 });
 
-// Edit a piece of art
+// Edit a piece
 
 router.put("/:artObjectId", async (req, res) => {
   const { artObjectId } = req.params;
   const payload = req.body;
   try {
-    const updateArt = await PieceOfArt.findByIdAndUpdate(recipeId, payload, {
+    const updateArt = await Product.findByIdAndUpdate(artObjectId, payload, {
       new: true,
     }); //update to model
     res.status(200).json(updateArt);
@@ -54,7 +67,7 @@ router.put("/:artObjectId", async (req, res) => {
 // Delete a piece
 router.delete("/:artObjectId", async (req, res) => {
   try {
-    await PieceOfArt.findByIdAndDelete(req.params.artObjectId);
+    await Product.findByIdAndDelete(req.params.artObjectId);
     res.status(200).json({ message: "Artwork succesfully deleted" });
   } catch (error) {
     console.log(error);
@@ -74,7 +87,9 @@ router.post("/cart/:artObjectId", async (req, res) => {
 
     if (cart) {
       // If the cart already exists, find the item in the cart
-      const item = cart.items.find((item) => item.product.toString() === artObjectId);
+      const item = cart.items.find(
+        (item) => item.product.toString() === artObjectId
+      );
 
       if (item) {
         // If the item already exists in the cart, increment the quantity
@@ -89,7 +104,7 @@ router.post("/cart/:artObjectId", async (req, res) => {
       // If the cart doesn't exist, create a new cart and add the item
       const newCart = new Cart({
         user: userId,
-        items: [{ product: artObjectId }]
+        items: [{ product: artObjectId }],
       });
 
       await newCart.save();
@@ -101,7 +116,5 @@ router.post("/cart/:artObjectId", async (req, res) => {
     res.status(500).json({ error: "Failed to add item to cart" });
   }
 });
-
-
 
 module.exports = router;
