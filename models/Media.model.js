@@ -1,6 +1,5 @@
 const { Schema, model } = require("mongoose");
 
-// TODO: Please make sure you edit the User model to whatever makes sense in this case
 const mediaSchema = new Schema({
   link: {
     type: String,
@@ -10,6 +9,11 @@ const mediaSchema = new Schema({
     type: String,
     enum: ["Image"],
     required: true,
+  },
+  product: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Product',
+    required: true
   },
 });
 
