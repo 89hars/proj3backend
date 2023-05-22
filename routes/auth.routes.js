@@ -18,7 +18,7 @@ router.post("/signup", async (req, res) => {
     const passwordHash = bcryptjs.hashSync(req.body.password, salt)
 
     try {
-        await User.create({ email: req.body.email, password: passwordHash })
+        await User.create({ firstName: req.body.firstName, lastName: req.body.lastName, email: req.body.email, password: passwordHash })
         res.status(201).json({ message: "new user in there !" })
     } catch (error) {
         console.log("there is an error in the post signup", error)
