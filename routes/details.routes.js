@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { isAuthenticated } = require('../middleware/jwt.middleware');
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
 const Product = require("../models/Product.models");
@@ -75,16 +76,11 @@ router.delete("/:artObjectId", async (req, res) => {
 });
 
 //To add a piece to cart
-router.post("/cart/:artObjectId", async (req, res) => {
+router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {
   try {
     const { artObjectId } = req.params;
-
-    // // Get the current user (you may need to implement user authentication)
-    // const userId = /* obtain the user ID */;
-
-    // Find the cart for the user
+    const userId = req.user.userId;
     const cart = await Cart.findOne({ user: userId });
-
     if (cart) {
       // If the cart already exists, find the item in the cart
       const item = cart.items.find(
