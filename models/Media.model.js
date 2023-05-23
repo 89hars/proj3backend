@@ -10,11 +10,7 @@ const mediaSchema = new Schema({
     enum: ["Image"],
     required: true,
   },
-  product: {
-    type: mongoose.Types.ObjectId,
-    ref: 'Product',
-    required: true
-  },
+
 });
 
 const Media = model("Media", mediaSchema);

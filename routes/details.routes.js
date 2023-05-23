@@ -1,8 +1,11 @@
 const router = require("express").Router();
-const { isAuthenticated } = require('../middleware/jwt.middleware');
+const { isAuthenticated } = require("../middleware/jwt.middleware");
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
 const Product = require("../models/Product.models");
+const Media = require("../models/Media.model");
+const uploader = require("../middleware/cloudinary.config");
+const multer = require("multer");
 
 // Route to create new user
 router.get("/create", async (req, res, next) => {
@@ -18,7 +21,7 @@ router.get("/create", async (req, res, next) => {
 
 router.get("/allproducts", async (req, res) => {
   try {
-    const allArt = await Product.find();
+    const allArt = await Product.find().populate("media");
     res.status(200).json(allArt);
   } catch (error) {
     console.log(error);
@@ -36,14 +39,30 @@ router.get("/details/:artObjectId", async (req, res) => {
   }
 });
 
+// Create one piece a new piece art using the form
 
+router.post("/create", uploader.single("imageUrl"), async (req, res) => {
+  /* const payload = req.body; */
 
-// Create one piece a new piece art
+  const { title, technic, artist, price, description } = req.body;
+  const link = req.file.path;
 
-router.post("/create", async (req, res) => {
-  const payload = req.body;
+  /* const payload = {title, technic, artist, price, description, link} */
   try {
-    const newPieceOfArt = await Product.create(payload);
+    // Create a new media
+    const newMedia = await Media.create({ link, type: "Image" }).populate(
+      "media"
+    );
+    // Create a new product
+    const newPieceOfArt = await Product.create({
+      title,
+      technic,
+      artist,
+      price,
+      description,
+      media: newMedia._id,
+    });
+
     res.status(201).json(newPieceOfArt);
   } catch (error) {
     console.log(error);
@@ -77,27 +96,25 @@ router.delete("/:artObjectId", async (req, res) => {
 
 // Route to search an art
 
-router.get('/search/:keyword', async (req, res) => {
+router.get("/search/:keyword", async (req, res) => {
   try {
-    const { keyword } = req.params
+    const { keyword } = req.params;
     const results = await Product.find({
       $or: [
         { title: { $regex: keyword, $options: "i" } },
         { description: { $regex: keyword, $options: "i" } },
-      ]
-    }).select('-photo')
-    res.json(results)
+      ],
+    }).select("-photo");
+    res.json(results);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(400).send({
       success: false,
-      message: 'Error In Search Product API',
+      message: "Error In Search Product API",
       error,
-    })
-
+    });
   }
-
-})
+});
 
 //To add a piece to cart
 router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {

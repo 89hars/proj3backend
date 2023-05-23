@@ -28,6 +28,7 @@ const productSchema = new Schema({
   media: {
     type: [mongoose.Types.ObjectId],
     ref: 'Media',
+    required: true
   }
 });
 
