@@ -100,41 +100,45 @@ router.get('/search/:keyword', async (req, res) => {
 })
 
 //To add a piece to cart
-router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {
+router.post("/cart", async (req, res) => {
+  console.log(req.body)
   try {
-    const { artObjectId } = req.params;
-    const userId = req.user.userId;
-    const cart = await Cart.findOne({ user: userId });
-    if (cart) {
-      // If the cart already exists, find the item in the cart
-      const item = cart.items.find(
-        (item) => item.product.toString() === artObjectId
-      );
+    const { userId, productId, quantity, price } = req.body;
+    const product = await Product.findById(productId);
+    const user = await User.findById(userId);
 
-      if (item) {
-        // If the item already exists in the cart, increment the quantity
-        item.quantity += 1;
-      } else {
-        // If the item doesn't exist in the cart, add it to the items array
-        cart.items.push({ product: artObjectId });
-      }
+    const cartItem = {
+      product: product._id,
+      quantity: quantity,
+      price: price,
+    };
 
-      await cart.save();
+
+    let cart = await Cart.findOne({ user: user._id });
+    console.log(cart, user)
+    if (!cart) {
+      cart = new Cart({ user: user._id, items: [cartItem] });
     } else {
-      // If the cart doesn't exist, create a new cart and add the item
-      const newCart = new Cart({
-        user: userId,
-        items: [{ product: artObjectId }],
-      });
-
-      await newCart.save();
+      cart.items.push(cartItem);
     }
 
-    res.status(201).json({ message: "Item added to cart successfully" });
+    await cart.save();
+
+    res.status(200).json({ success: true, cart });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to add item to cart" });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
+
+router.get("/cart", async (req, res) => {
+  try {
+    const allArt = await Cart.find();
+    res.status(200).json(allArt);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
 
 module.exports = router;
