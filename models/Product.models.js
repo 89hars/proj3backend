@@ -1,4 +1,4 @@
-const { Schema, model, default: mongoose } = require("mongoose");
+const { Schema, model, default: mongoose } = require("mongoose")
 
 const productSchema = new Schema({
   artist: {
@@ -18,8 +18,8 @@ const productSchema = new Schema({
     required: true,
   },
   description: {
-    type: String, 
-    required: false, 
+    type: String,
+    required: false,
   },
   createdAt: {
     type: Date,
@@ -28,8 +28,13 @@ const productSchema = new Schema({
   media: {
     type: [mongoose.Types.ObjectId],
     ref: 'Media',
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   }
-});
+})
 
-const Product = model("Product", productSchema);
-module.exports = Product;
+const Product = model("Product", productSchema)
+module.exports = Product
