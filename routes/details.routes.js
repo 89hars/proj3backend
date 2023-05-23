@@ -7,6 +7,8 @@ const Media = require("../models/Media.model");
 const uploader = require("../middleware/cloudinary.config");
 const multer = require("multer");
 
+
+
 // Route to create new user
 router.get("/create", async (req, res, next) => {
   try {
@@ -47,6 +49,7 @@ router.post("/create", uploader.single("imageUrl"), async (req, res) => {
   /* const payload = req.body; */
 
   const { title, technic, artist, price, description } = req.body;
+  console.log(req.body);
   const link = req.file.path;
 
   /* const payload = {title, technic, artist, price, description, link} */
