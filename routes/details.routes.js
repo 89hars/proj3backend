@@ -32,7 +32,7 @@ router.get("/allproducts", async (req, res) => {
 
 router.get("/details/:artObjectId", async (req, res) => {
   try {
-    const pieceOfArt = await Product.findById(req.params.artObjectId);
+    const pieceOfArt = await Product.findById(req.params.artObjectId).populate("media")
     res.status(200).json(pieceOfArt);
   } catch (error) {
     console.log(error);
@@ -50,9 +50,7 @@ router.post("/create", uploader.single("imageUrl"), async (req, res) => {
   /* const payload = {title, technic, artist, price, description, link} */
   try {
     // Create a new media
-    const newMedia = await Media.create({ link, type: "Image" }).populate(
-      "media"
-    );
+    const newMedia = await Media.create({ link, type: "Image" })
     // Create a new product
     const newPieceOfArt = await Product.create({
       title,
