@@ -6,6 +6,25 @@ const Product = require("../models/Product.models");
 const Media = require("../models/Media.model");
 const uploader = require("../middleware/cloudinary.config");
 const multer = require("multer");
+const braintree = require('braintree')
+
+//payment gateway
+var gateway = new braintree.BraintreeGateway({
+  environment: braintree.Environment.Sandbox,
+  merchantId: process.env.BRAINTREE_MERCHANT_ID,
+  publicKey: process.env.BRAINTREE_PUBLIC_KEY,
+  privateKey: process.env.BRAINTREE_PRIVATE_KEY,
+});
+
+// Route to create new user
+router.get("/create", async (req, res, next) => {
+  try {
+    const newUser = await User.find();
+    res.status(200).json(newUser);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 // Get all piece of art
 
@@ -17,6 +36,7 @@ router.get("/allproducts", async (req, res) => {
     console.log(error);
   }
 });
+
 
 // Get one piece of art
 router.get("/details/:artObjectId", async (req, res) => {
@@ -35,13 +55,13 @@ router.get("/details/:artObjectId", async (req, res) => {
 router.get("/search/:keyword", async (req, res) => {
   try {
     const { keyword } = req.params;
-    const results = await Product.find({
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-      ],
-    }).select("-photo");
-    res.json(results);
+    const results = await Product.find().select('-photo');
+    const filteredResults = results.filter((product) => {
+      const titleMatch = product.title.toLowerCase().includes(keyword.toLowerCase());
+      const descriptionMatch = product.description.toLowerCase().includes(keyword.toLowerCase());
+      return titleMatch || descriptionMatch;
+    });
+    res.json(filteredResults);
   } catch (error) {
     console.log(error);
     res.status(400).send({
@@ -53,41 +73,82 @@ router.get("/search/:keyword", async (req, res) => {
 });
 
 //To add a piece to cart
-router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {
+router.post("/cart", async (req, res) => {
+
   try {
-    const { artObjectId } = req.params;
-    const userId = req.user.userId;
-    const cart = await Cart.findOne({ user: userId });
-    if (cart) {
-      // If the cart already exists, find the item in the cart
-      const item = cart.items.find(
-        (item) => item.product.toString() === artObjectId
-      );
+    const { userId, productId, quantity, price } = req.body;
+    const product = await Product.findById(productId);
+    const user = await User.findById(userId);
 
-      if (item) {
-        // If the item already exists in the cart, increment the quantity
-        item.quantity += 1;
-      } else {
-        // If the item doesn't exist in the cart, add it to the items array
-        cart.items.push({ product: artObjectId });
-      }
+    const cartItem = {
+      product: product._id,
+      quantity: quantity,
+      price: price,
+    };
 
-      await cart.save();
-    } else {
-      // If the cart doesn't exist, create a new cart and add the item
-      const newCart = new Cart({
-        user: userId,
-        items: [{ product: artObjectId }],
-      });
+    console.log('User,Product', user, product)
+    let cart = await Cart.updateOne({ user: user._id }, { $push: { items: cartItem } });
+    // console.log(cart, user)
 
-      await newCart.save();
-    }
 
-    res.status(201).json({ message: "Item added to cart successfully" });
+
+
+    res.status(200).json({ success: true, cart });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to add item to cart" });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
+router.get("/cart", async (req, res) => {
+  try {
+    const allArt = await Cart.find();
+    res.status(200).json(allArt);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.get('/braintree/token', async (req, res) => {
+  try {
+    gateway.clientToken.generate({}, function (err, response) {
+      if (err) {
+        res.status(500).send(err)
+      }
+      else {
+        res.send(response);
+      }
+    })
+  } catch (error) {
+    console.log(error)
+  }
+})
+router.post('/braintree/payment', isAuthenticated, async (req, res) => {
+  try {
+    const { cart, nonce } = req.body;
+    let total = 0;
+    cart.map((i) => {
+      total += i.price;
+    });
+    let newTransaction = gateway.transaction.sale({
+      amount: total,
+      paymentMethodNonce: nonce,
+      options: {
+        submitForSettlement: true
+      }
+    },
+      function (error, result) {
+        if (result) {
+          const order = new Order({ products: cart, payment: result, buyer: req.user._id }).save()
+          res.json({ ok: true })
+
+        }
+        else {
+          res.status(500).send(error)
+        }
+      }
+    )
+  } catch (error) {
+    console.log(error)
+  }
+})
 module.exports = router;
