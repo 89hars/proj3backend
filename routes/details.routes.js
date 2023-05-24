@@ -1,11 +1,11 @@
-const router = require("express").Router();
-const { isAuthenticated } = require("../middleware/jwt.middleware");
-const User = require("../models/User.model");
-const Cart = require("../models/Cart.model");
-const Product = require("../models/Product.models");
-const Media = require("../models/Media.model");
-const uploader = require("../middleware/cloudinary.config");
-const multer = require("multer");
+const router = require("express").Router()
+const { isAuthenticated } = require("../middleware/jwt.middleware")
+const User = require("../models/User.model")
+const Cart = require("../models/Cart.model")
+const Product = require("../models/Product.models")
+const Media = require("../models/Media.model")
+const uploader = require("../middleware/cloudinary.config")
+const multer = require("multer")
 const braintree = require('braintree')
 
 //payment gateway
@@ -14,28 +14,29 @@ var gateway = new braintree.BraintreeGateway({
   merchantId: process.env.BRAINTREE_MERCHANT_ID,
   publicKey: process.env.BRAINTREE_PUBLIC_KEY,
   privateKey: process.env.BRAINTREE_PRIVATE_KEY,
-});
+})
 
 // Route to create new user
 router.get("/create", async (req, res, next) => {
   try {
-    const newUser = await User.find();
-    res.status(200).json(newUser);
+    const newUser = await User.find()
+    res.status(200).json(newUser)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-});
+})
 
 // Get all piece of art
 
 router.get("/allproducts", async (req, res) => {
   try {
-    const allArt = await Product.find().populate("media");
-    res.status(200).json(allArt);
+    const allArt = await Product.find().populate("media")
+   
+    res.status(200).json(allArt)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-});
+})
 
 
 // Get one piece of art
@@ -43,67 +44,55 @@ router.get("/details/:artObjectId", async (req, res) => {
   try {
     const pieceOfArt = await Product.findById(req.params.artObjectId).populate(
       "media"
-    );
-    res.status(200).json(pieceOfArt);
+    )
+    res.status(200).json(pieceOfArt)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-});
+})
 
 // Route to search an art
 
 router.get("/search/:keyword", async (req, res) => {
   try {
-    const { keyword } = req.params;
-    const results = await Product.find().select('-photo');
+    const { keyword } = req.params
+    const results = await Product.find().select('-photo')
     const filteredResults = results.filter((product) => {
-      const titleMatch = product.title.toLowerCase().includes(keyword.toLowerCase());
-      const descriptionMatch = product.description.toLowerCase().includes(keyword.toLowerCase());
-      return titleMatch || descriptionMatch;
-    });
-    res.json(filteredResults);
+      const titleMatch = product.title.toLowerCase().includes(keyword.toLowerCase())
+      const descriptionMatch = product.description.toLowerCase().includes(keyword.toLowerCase())
+      return titleMatch || descriptionMatch
+    })
+    res.json(filteredResults)
   } catch (error) {
-    console.log(error);
+    console.log(error)
     res.status(400).send({
       success: false,
       message: "Error In Search Product API",
       error,
-    });
+    })
   }
-});
+})
 
 //To add a piece to cart
-router.post("/cart", async (req, res) => {
-
+router.post("/cart", isAuthenticated, async (req, res) => {
   try {
-    const { userId, productId, quantity, price } = req.body;
-    const product = await Product.findById(productId);
-    const user = await User.findById(userId);
-
-    const cartItem = {
-      product: product._id,
-      quantity: quantity,
-      price: price,
-    };
-
-    console.log('User,Product', user, product)
-    let cart = await Cart.updateOne({ user: user._id }, { $push: { items: cartItem } });
-    // console.log(cart, user)
-
-    res.status(200).json({ success: true, cart });
+    const userId = req.auth.userId
+    const { productId } = req.body
+    await Cart.create({ userId, productId})
+    res.status(200)
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: error.message })
   }
-});
+})
 
 router.get("/cart", async (req, res) => {
   try {
-    const allArt = await Cart.find();
-    res.status(200).json(allArt);
+    const allArt = await Cart.find()
+    res.status(200).json(allArt)
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
-});
+})
 
 router.get('/braintree/token', async (req, res) => {
   try {
@@ -112,20 +101,21 @@ router.get('/braintree/token', async (req, res) => {
         res.status(500).send(err)
       }
       else {
-        res.send(response);
+        res.send(response)
       }
     })
   } catch (error) {
     console.log(error)
   }
 })
+
 router.post('/braintree/payment', isAuthenticated, async (req, res) => {
   try {
-    const { cart, nonce } = req.body;
-    let total = 0;
+    const { cart, nonce } = req.body
+    let total = 0
     cart.map((i) => {
-      total += i.price;
-    });
+      total += i.price
+    })
     let newTransaction = gateway.transaction.sale({
       amount: total,
       paymentMethodNonce: nonce,
@@ -148,4 +138,4 @@ router.post('/braintree/payment', isAuthenticated, async (req, res) => {
     console.log(error)
   }
 })
-module.exports = router;
+module.exports = router

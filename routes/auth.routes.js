@@ -31,7 +31,6 @@ router.post("/signup", async (req, res) => {
 
 //post to login
 router.post('/login', async (req, res) => {
-    console.log('=!!!!!!!!')
     try {
         //user exist or no ? 
         const user = await User.findOne({ email: req.body.email })

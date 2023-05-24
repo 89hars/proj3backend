@@ -16,7 +16,6 @@ router.get("/", async (req, res) => {
 router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req, res) => {
   try {
     const { title, technic, artist, price, description } = req.body
-    console.log(title)
     let link
     if (req.file){
      link = req.file.path} else {}
@@ -38,11 +37,9 @@ router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req,
 
 router.put("/:productId", async (req, res) => {
   const payload = req.body
-  console.log(payload)
   const { productId } = req.params
   try {
     const productUpdated = await Product.findByIdAndUpdate(productId, payload, { new: true })
-    console.log(productUpdated)
     res.status(200).json(productUpdated)
   } catch (error) {
     console.log(error)
@@ -60,7 +57,6 @@ router.delete("/:productId", async (req, res) => {
 
 router.get("/createdby/:userId", async (req, res) => {
   const { userId } = req.params
-  console.log(userId)
   try {
     const products = await Product
       .find({ createdBy: userId })
