@@ -1,5 +1,6 @@
 const router = require("express").Router()
 const User = require('../models/User.model')
+const Cart = require('../models/Cart.model')
 const bcryptjs = require('bcryptjs')
 const jwt = require("jsonwebtoken")
 const { isAuthenticated } = require('../middleware/jwt.middleware')
@@ -30,9 +31,11 @@ router.post("/signup", async (req, res) => {
 
 //post to login
 router.post('/login', async (req, res) => {
+    console.log('=!!!!!!!!')
     try {
         //user exist or no ? 
         const user = await User.findOne({ email: req.body.email })
+        console.log('Found user', user)
         if (user) //when user exist we check password 
         {
             if (bcryptjs.compareSync(req.body.password, user.password)) {
@@ -42,19 +45,21 @@ router.post('/login', async (req, res) => {
                     process.env.TOKEN_SECRET,
                     { algorithm: 'HS256', expiresIn: "6h" }
                 )
+                const cart = await Cart.create({ user: user._id, items: [] })
+                console.log("Here is new cart", cart)
                 user.password = ""
                 res.json({ token, user })
             }
             else {
-                res.render('auth/login')
-                console.log("Username or password incorrect")
+                res.json({ message: "Username or password incorrect" })
+
 
             }
         }
 
         // if user doest not exist
         else {
-            res.render('auth/login')
+            res.json('auth/login')
         }
     }
     catch (err) { console.log("Error in login route", err) }
