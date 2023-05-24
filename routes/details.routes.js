@@ -73,7 +73,7 @@ router.get("/search/:keyword", async (req, res) => {
 
 //To add a piece to cart
 router.post("/cart", async (req, res) => {
-  console.log('reqbody: ==============', req.body)
+ 
   try {
     const { userId, productId, quantity, price } = req.body;
     const product = await Product.findById(productId);
@@ -85,12 +85,8 @@ router.post("/cart", async (req, res) => {
       price: price,
     };
 
-
     let cart = await Cart.updateOne({ user: user._id }, { $push: { items: cartItem } });
     // console.log(cart, user)
-
-
-
 
     res.status(200).json({ success: true, cart });
   } catch (error) {
