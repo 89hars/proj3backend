@@ -90,9 +90,6 @@ router.post("/cart", async (req, res) => {
     let cart = await Cart.updateOne({ user: user._id }, { $push: { items: cartItem } });
     // console.log(cart, user)
 
-
-
-
     res.status(200).json({ success: true, cart });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
