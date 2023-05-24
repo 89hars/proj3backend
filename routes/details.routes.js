@@ -3,11 +3,9 @@ const { isAuthenticated } = require("../middleware/jwt.middleware");
 const User = require("../models/User.model");
 const Cart = require("../models/Cart.model");
 const Product = require("../models/Product.models");
-<<<<<<< HEAD
 const Media = require("../models/Media.model");
 const uploader = require("../middleware/cloudinary.config");
 const multer = require("multer");
-=======
 const braintree = require('braintree')
 
 //payment gateway
@@ -27,7 +25,6 @@ router.get("/create", async (req, res, next) => {
     console.log(error);
   }
 });
->>>>>>> branch/new1
 
 // Get all piece of art
 
@@ -57,15 +54,6 @@ router.get("/details/:artObjectId", async (req, res) => {
 router.get("/search/:keyword", async (req, res) => {
   try {
     const { keyword } = req.params;
-<<<<<<< HEAD
-    const results = await Product.find({
-      $or: [
-        { title: { $regex: keyword, $options: "i" } },
-        { description: { $regex: keyword, $options: "i" } },
-      ],
-    }).select("-photo");
-    res.json(results);
-=======
     const results = await Product.find().select('-photo');
     const filteredResults = results.filter((product) => {
       const titleMatch = product.title.toLowerCase().includes(keyword.toLowerCase());
@@ -73,7 +61,6 @@ router.get("/search/:keyword", async (req, res) => {
       return titleMatch || descriptionMatch;
     });
     res.json(filteredResults);
->>>>>>> branch/new1
   } catch (error) {
     console.log(error);
     res.status(400).send({
@@ -81,47 +68,6 @@ router.get("/search/:keyword", async (req, res) => {
       message: "Error In Search Product API",
       error,
     });
-<<<<<<< HEAD
-  }
-});
-
-//To add a piece to cart
-router.post("/cart/:artObjectId", isAuthenticated, async (req, res) => {
-  try {
-    const { artObjectId } = req.params;
-    const userId = req.user.userId;
-    const cart = await Cart.findOne({ user: userId });
-    if (cart) {
-      // If the cart already exists, find the item in the cart
-      const item = cart.items.find(
-        (item) => item.product.toString() === artObjectId
-      );
-
-      if (item) {
-        // If the item already exists in the cart, increment the quantity
-        item.quantity += 1;
-      } else {
-        // If the item doesn't exist in the cart, add it to the items array
-        cart.items.push({ product: artObjectId });
-      }
-
-      await cart.save();
-    } else {
-      // If the cart doesn't exist, create a new cart and add the item
-      const newCart = new Cart({
-        user: userId,
-        items: [{ product: artObjectId }],
-      });
-
-      await newCart.save();
-    }
-
-    res.status(201).json({ message: "Item added to cart successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to add item to cart" });
-=======
->>>>>>> branch/new1
   }
 });
 
