@@ -5,7 +5,7 @@ const multer = require('multer');
 
 // your three cloudinary keys will be passed here from your .env file
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
+  cloud_name: process.env.VITE,
   api_key: process.env.CLOUD_API_KEY,
   api_secret: process.env.CLOUD_API_SECRET
 });

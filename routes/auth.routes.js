@@ -39,7 +39,7 @@ router.post('/login', async (req, res) => {
                 // this is what we do when password ok
                 const token = jwt.sign(
                     { userId: user._id },
-                    process.env.TOKEN_SECRET,
+                    process.env.VITE_TOKEN_SECRET,
                     { algorithm: 'HS256', expiresIn: "6h" }
                 )
                 user.password = ""
