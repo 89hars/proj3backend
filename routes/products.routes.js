@@ -17,7 +17,9 @@ router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req,
   try {
     const { title, technic, artist, price, description } = req.body
     console.log(title)
-    const link = req.file.path
+    let link
+    if (req.file){
+     link = req.file.path} else {}
     const newMedia = await Media.create({ link, type: "Image" })
     const productCreated = await Product.create({
       title,
