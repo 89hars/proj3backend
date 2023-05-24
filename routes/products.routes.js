@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
   }
 })
 
-router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req, res) => {
+router.post("/create", uploader.single("imageUrl"), async (req, res) => {
   try {
     const { title, technic, artist, price, description } = req.body
     console.log(title)
