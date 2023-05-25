@@ -7,6 +7,7 @@ const Media = require("../models/Media.model")
 const uploader = require("../middleware/cloudinary.config")
 const multer = require("multer")
 const braintree = require('braintree')
+const Order = require("../models/Order.model")
 
 //payment gateway
 var gateway = new braintree.BraintreeGateway({
@@ -125,7 +126,7 @@ router.post('/braintree/payment', isAuthenticated, async (req, res) => {
     },
       function (error, result) {
         if (result) {
-          const order = new Order({ products: cart, payment: result, buyer: req.user._id }).save()
+          const order = new Order({ product: cart, payment: result, buyer: req.user._id }).save()
           res.json({ ok: true })
 
         }
