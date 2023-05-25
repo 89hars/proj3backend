@@ -1,5 +1,6 @@
 const router = require("express").Router()
 const Cart = require("../models/Cart.model")
+const Order = require("../models/Order.model")
 const { isAuthenticated } = require('../middleware/jwt.middleware')
 
 router.post("/", isAuthenticated, async (req, res) => {
@@ -30,6 +31,26 @@ router.get("/", isAuthenticated, async (req, res) => {
     }
 })
 
+router.get("/purchasedby/:userId", async (req, res) => {
+    const { userId } = req.params
+    try {
+        const productPurchased = await Order
+            .find({ buyer: userId })
+            .populate({
+                path: 'product',
+                populate: {
+                    path: 'media'
+                }
+            })
+            .populate('buyer')
+        res.status(200).json(productPurchased)
+
+    }
+    catch (error) {
+        console.log("error getting the product purchased", error)
+    }
+})
+
 router.delete("/:cartId", async (req, res) => {
     try {
         const { cartId } = req.params
@@ -43,7 +64,10 @@ router.delete("/:cartId", async (req, res) => {
 router.delete("/", isAuthenticated, async (req, res) => {
     try {
         const userId = req.auth.userId
-        const response = await Cart.deleteMany({ user: userId });
+        console.log(products)
+        consle.log("ca marche")
+        res.status(200).json(products)
+        const response = await Cart.deleteMany({ user: userId })
         res.status(200).json(response)
     } catch (error) {
         res.status(500).json({ success: false, error: error.message })
