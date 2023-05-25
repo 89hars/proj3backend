@@ -13,34 +13,43 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req, res) => {
-  try {
-    const { title, technic, artist, price, description } = req.body
-    let link
-    if (req.file){
-     link = req.file.path} else {}
-    const newMedia = await Media.create({ link, type: "Image" })
-    const productCreated = await Product.create({
-      title,
-      technic,
-      artist,
-      price,
-      description,
-      media: newMedia._id,
-      createdBy: req.auth.userId
-    })
-    res.status(201).json(productCreated)
-  } catch (error) {
-    console.log(error)
+router.post(
+  "/create",
+  isAuthenticated,
+  uploader.single("imageUrl"),
+  async (req, res) => {
+    try {
+      const { title, technic, artist, price, description } = req.body;
+      let link;
+      if (req.file) {
+        link = req.file.path;
+      } else {
+      }
+      const newMedia = await Media.create({ link, type: "Image" });
+      const productCreated = await Product.create({
+        title,
+        technic,
+        artist,
+        price,
+        description,
+        media: newMedia._id,
+        createdBy: req.auth.userId,
+      });
+      res.status(201).json(productCreated);
+    } catch (error) {
+      console.log(error);
+    }
   }
 );
 
 router.put("/:productId", async (req, res) => {
-  const payload = req.body
-  const { productId } = req.params
+  const payload = req.body;
+  const { productId } = req.params;
   try {
-    const productUpdated = await Product.findByIdAndUpdate(productId, payload, { new: true })
-    res.status(200).json(productUpdated)
+    const productUpdated = await Product.findByIdAndUpdate(productId, payload, {
+      new: true,
+    });
+    res.status(200).json(productUpdated);
   } catch (error) {
     console.log(error);
   }
@@ -57,7 +66,7 @@ router.delete("/:productId", async (req, res) => {
 });
 
 router.get("/createdby/:userId", async (req, res) => {
-  const { userId } = req.params
+  const { userId } = req.params;
   try {
     const products = await Product.find({ createdBy: userId })
       .populate("createdBy")
