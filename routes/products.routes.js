@@ -33,7 +33,7 @@ router.post("/create", isAuthenticated, uploader.single("imageUrl"), async (req,
   } catch (error) {
     console.log(error)
   }
-);
+});
 
 router.put("/:productId", async (req, res) => {
   const payload = req.body
