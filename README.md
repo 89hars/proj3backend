@@ -9,7 +9,7 @@
 * A user profile to display the products linked to the especific session.
 
 # About
-* Backend running using ExpressJs and MongoDb.
+* Backend running using ExpressJs.
 * Middleware Functions to secure routes and conect with cloud services to store images.
 * Bycrypt to hash the password
 * Possibility of storing images using Claudinary
@@ -19,8 +19,8 @@
 # Backlog
 * Adding a mechanism for users to interact between them.
 * Adding a favorites functionality to the profile. 
-* Incoporating a comment model
-* 
+* Incoporating a comment model.
+* Incoporating a model for Stores and a clear way of handle revenews, taxes and shippings. 
 
 # Data Structure
 ```
