@@ -17,10 +17,14 @@
 * Project deployed on Adaptable
 
 # Backlog
-* Adding a mechanism for users to interact between them.
-* Adding a favorites functionality to the profile. 
-* Incoporating a comment model.
-* Incoporating a model for Stores and a clear way of handle revenews, taxes and shippings. 
+* Adding a mechanism for users to interact with each other.
+* Adding a favorites functionality to the profile.
+* Incorporating a comment model.
+* Incorporating a model for Stores and providing a clear way to handle revenues, taxes, and shipping.
+* Generating hierarchy among users based on minimum sales numbers, as a way to incentivize trust in buyers.
+* Adding more pictures to the product.
+* Adding a special section for audiovisual pieces.
+* Adding a NFT section. 
 
 # Data Structure
 ```
